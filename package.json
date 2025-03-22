@@ -1,5 +1,5 @@
 {
-  "name": "fastmcp",
+  "name": "fastmcp-cursor",
   "version": "1.0.0",
   "main": "dist/FastMCP.js",
   "scripts": {
@@ -8,16 +8,17 @@
     "format": "prettier --write . && eslint --fix ."
   },
   "bin": {
-    "fastmcp": "dist/bin/fastmcp.js"
+    "fastmcp-cursor": "dist/bin/fastmcp.js"
   },
   "keywords": [
     "MCP",
-    "SSE"
+    "SSE",
+    "Cursor"
   ],
   "type": "module",
-  "author": "Frank Fiegel <frank@glama.ai>",
+  "author": "Thomas Dillinger",
   "license": "MIT",
-  "description": "A TypeScript framework for building MCP servers.",
+  "description": "A TypeScript framework for building MCP servers for Cursor.",
   "module": "dist/FastMCP.js",
   "types": "dist/FastMCP.d.ts",
   "dependencies": {
@@ -34,9 +35,8 @@
     "zod-to-json-schema": "^3.24.3"
   },
   "repository": {
-    "url": "https://github.com/punkpeye/fastmcp"
+    "url": "https://github.com/dillionaire/fastmcp-cursor"
   },
-  "homepage": "https://glama.ai/mcp",
   "release": {
     "branches": [
       "main"
