@@ -31,18 +31,22 @@ export const CursorToolParameters = {
     require_user_approval: z.boolean().describe('Whether user approval is required'),
     explanation: z.string().optional().describe('One sentence explanation for the command')
   })
+} as const;
+
+type CursorTools = {
+  [K in keyof typeof CursorToolParameters]: Tool<undefined, typeof CursorToolParameters[K]>
 };
 
 /**
  * Cursor-specific tool implementations
  */
-export const CursorTools = {
+const cursorTools: CursorTools = {
   codebaseSearch: {
     name: 'codebase_search',
     description: 'Search the codebase for relevant code snippets',
     parameters: CursorToolParameters.codebaseSearch,
-    execute: async (args: z.infer<typeof CursorToolParameters.codebaseSearch>, context: Context<any>): Promise<ContentResult> => {
-      // Implementation would integrate with Cursor's codebase search
+    execute: async (args, context): Promise<ContentResult> => {
+      context.log.info(`Searching codebase for: ${args.query}`);
       return {
         content: [
           {
@@ -58,8 +62,8 @@ export const CursorTools = {
     name: 'read_file',
     description: 'Read contents of a file',
     parameters: CursorToolParameters.readFile,
-    execute: async (args: z.infer<typeof CursorToolParameters.readFile>, context: Context<any>): Promise<ContentResult> => {
-      // Implementation would integrate with Cursor's file reading capability
+    execute: async (args, context): Promise<ContentResult> => {
+      context.log.info(`Reading file: ${args.target_file}`);
       return {
         content: [
           {
@@ -75,8 +79,8 @@ export const CursorTools = {
     name: 'edit_file',
     description: 'Edit a file',
     parameters: CursorToolParameters.editFile,
-    execute: async (args: z.infer<typeof CursorToolParameters.editFile>, context: Context<any>): Promise<ContentResult> => {
-      // Implementation would integrate with Cursor's file editing capability
+    execute: async (args, context): Promise<ContentResult> => {
+      context.log.info(`Editing file: ${args.target_file}`);
       return {
         content: [
           {
@@ -92,8 +96,8 @@ export const CursorTools = {
     name: 'run_terminal_cmd',
     description: 'Run a terminal command',
     parameters: CursorToolParameters.runTerminalCmd,
-    execute: async (args: z.infer<typeof CursorToolParameters.runTerminalCmd>, context: Context<any>): Promise<ContentResult> => {
-      // Implementation would integrate with Cursor's terminal command execution
+    execute: async (args, context): Promise<ContentResult> => {
+      context.log.info(`Running command: ${args.command}`);
       return {
         content: [
           {
@@ -104,7 +108,7 @@ export const CursorTools = {
       };
     }
   }
-} as const;
+};
 
 /**
  * CursorMCP class extending FastMCP with Cursor-specific functionality
@@ -117,7 +121,7 @@ export class CursorMCP extends FastMCP {
     });
 
     // Add Cursor-specific tools
-    Object.values(CursorTools).forEach(tool => {
+    Object.values(cursorTools).forEach(tool => {
       this.addTool(tool);
     });
   }
