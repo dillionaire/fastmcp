@@ -33,14 +33,12 @@ export const CursorToolParameters = {
   })
 } as const;
 
-type CursorTools = {
-  [K in keyof typeof CursorToolParameters]: Tool<undefined, typeof CursorToolParameters[K]>
-};
+type CursorTool<T extends keyof typeof CursorToolParameters> = Tool<undefined, typeof CursorToolParameters[T]>;
 
 /**
  * Cursor-specific tool implementations
  */
-const cursorTools: CursorTools = {
+const cursorTools = {
   codebaseSearch: {
     name: 'codebase_search',
     description: 'Search the codebase for relevant code snippets',
@@ -56,7 +54,7 @@ const cursorTools: CursorTools = {
         ]
       };
     }
-  },
+  } as CursorTool<'codebaseSearch'>,
 
   readFile: {
     name: 'read_file',
@@ -73,7 +71,7 @@ const cursorTools: CursorTools = {
         ]
       };
     }
-  },
+  } as CursorTool<'readFile'>,
 
   editFile: {
     name: 'edit_file',
@@ -90,7 +88,7 @@ const cursorTools: CursorTools = {
         ]
       };
     }
-  },
+  } as CursorTool<'editFile'>,
 
   runTerminalCmd: {
     name: 'run_terminal_cmd',
@@ -107,13 +105,15 @@ const cursorTools: CursorTools = {
         ]
       };
     }
-  }
+  } as CursorTool<'runTerminalCmd'>
 };
 
 /**
  * CursorMCP class extending FastMCP with Cursor-specific functionality
  */
 export class CursorMCP extends FastMCP {
+  private _tools: Tool<any>[] = [];
+
   constructor() {
     super({
       name: 'cursor-mcp',
@@ -123,7 +123,15 @@ export class CursorMCP extends FastMCP {
     // Add Cursor-specific tools
     Object.values(cursorTools).forEach(tool => {
       this.addTool(tool);
+      this._tools.push(tool);
     });
+  }
+
+  /**
+   * Get all registered tools
+   */
+  get tools(): Tool<any>[] {
+    return this._tools;
   }
 
   /**
