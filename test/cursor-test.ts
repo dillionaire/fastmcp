@@ -1,85 +1,70 @@
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { CursorMCP } from '../src/CursorMCP.js';
-import { describe, it, expect } from 'vitest';
-import { Tool } from '../src/FastMCP.js';
 
-describe('CursorMCP Integration Test', () => {
-  it('should initialize and handle Cursor-specific tools', async () => {
-    const mcp = new CursorMCP();
+describe('CursorMCP', () => {
+  let mcp: CursorMCP;
+
+  beforeAll(async () => {
+    mcp = new CursorMCP();
+    await mcp.initialize();
+  });
+
+  afterAll(async () => {
+    await mcp.stop();
+  });
+
+  it('should have all required tools registered', () => {
+    const tools = mcp.tools;
+    expect(tools).toHaveLength(4);
     
-    // Test codebase search
-    const searchResult = await mcp.tools.find((t: Tool<any>) => t.name === 'codebase_search')?.execute({
+    const toolNames = tools.map(t => t.name);
+    expect(toolNames).toContain('codebase_search');
+    expect(toolNames).toContain('read_file');
+    expect(toolNames).toContain('edit_file');
+    expect(toolNames).toContain('run_terminal_cmd');
+  });
+
+  it('should execute codebase search', async () => {
+    const result = await mcp.executeToolByName('codebase_search', {
       query: 'test query',
       target_directories: ['src']
-    }, {
-      session: undefined,
-      reportProgress: async () => {},
-      log: {
-        debug: () => {},
-        error: () => {},
-        info: () => {},
-        warn: () => {}
-      }
     });
 
-    expect(searchResult).toBeDefined();
-    expect(searchResult?.content[0].type).toBe('text');
+    expect(result).toBeDefined();
+    expect(result.content[0].type).toBe('text');
+  });
 
-    // Test file reading
-    const readResult = await mcp.tools.find((t: Tool<any>) => t.name === 'read_file')?.execute({
+  it('should execute file read', async () => {
+    const result = await mcp.executeToolByName('read_file', {
       target_file: 'test/cursor-test.ts',
-      should_read_entire_file: true,
+      should_read_entire_file: false,
       start_line_one_indexed: 1,
       end_line_one_indexed_inclusive: 10
-    }, {
-      session: undefined,
-      reportProgress: async () => {},
-      log: {
-        debug: () => {},
-        error: () => {},
-        info: () => {},
-        warn: () => {}
-      }
     });
 
-    expect(readResult).toBeDefined();
-    expect(readResult?.content[0].type).toBe('text');
+    expect(result).toBeDefined();
+    expect(result.content[0].type).toBe('text');
+  });
 
-    // Test file editing
-    const editResult = await mcp.tools.find((t: Tool<any>) => t.name === 'edit_file')?.execute({
+  it('should execute file edit', async () => {
+    const result = await mcp.executeToolByName('edit_file', {
       target_file: 'test/test-file.txt',
-      instructions: 'Add a test line',
+      instructions: 'Add test line',
       code_edit: 'Test content'
-    }, {
-      session: undefined,
-      reportProgress: async () => {},
-      log: {
-        debug: () => {},
-        error: () => {},
-        info: () => {},
-        warn: () => {}
-      }
     });
 
-    expect(editResult).toBeDefined();
-    expect(editResult?.content[0].type).toBe('text');
+    expect(result).toBeDefined();
+    expect(result.content[0].type).toBe('text');
+  });
 
-    // Test terminal command
-    const cmdResult = await mcp.tools.find((t: Tool<any>) => t.name === 'run_terminal_cmd')?.execute({
+  it('should execute terminal command', async () => {
+    const result = await mcp.executeToolByName('run_terminal_cmd', {
       command: 'echo "test"',
       is_background: false,
       require_user_approval: true
-    }, {
-      session: undefined,
-      reportProgress: async () => {},
-      log: {
-        debug: () => {},
-        error: () => {},
-        info: () => {},
-        warn: () => {}
-      }
     });
 
-    expect(cmdResult).toBeDefined();
-    expect(cmdResult?.content[0].type).toBe('text');
+    expect(result).toBeDefined();
+    expect(result.content[0].type).toBe('text');
   });
 });
